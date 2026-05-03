@@ -1,26 +1,21 @@
-# Etapa 1: Build con Node.js
-FROM node:18-alpine AS build
+# Etapa 1: Build con Node 20 (necesario para Vite 8)
+FROM node:20-alpine AS build
 WORKDIR /app
 
-# Copiar archivos de configuración de npm
+# Copiar archivos de configuración
 COPY package*.json ./
 
 # Instalar dependencias
 RUN npm install
 
-# Copiar todo el código (incluyendo la carpeta src y public)
+# Copiar todo el código
 COPY . .
 
-# Ejecutar el build de Vite para generar la carpeta /dist
+# Ahora sí encontrará el script "build"
 RUN npm run build
 
 # Etapa 2: Servir con Nginx
 FROM nginx:stable-alpine
-
-# Copiar los archivos construidos desde la etapa anterior
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Exponer el puerto estándar
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]
